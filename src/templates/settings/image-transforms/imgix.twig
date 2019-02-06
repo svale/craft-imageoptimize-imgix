@@ -29,3 +29,12 @@
     value: imageTransform.securityToken,
     warning: configWarning('imageTransformTypeSettings', 'image-optimize'),
 }) }}
+<!-- allowPdfs -->
+{{ forms.lightswitchField({
+    label: "Allow PDF images"|t('image-optimize'),
+    instructions: "Imgix supports PDFs as source images. Turn this on if you want to upload PDFs and have the transformed in the same way as other images. IMPORTANT: You must enable 'Allow Up-Scaled Image Variants' for this to work."|t('image-optimize'),
+    'id': 'allowPdfs',
+    'name': 'allowPdfs',
+    'on': imageTransform.allowPdfs,
+    'warning': configWarning('allowPdfs', 'image-optimize')
+}) }}

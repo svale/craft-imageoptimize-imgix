@@ -17,6 +17,7 @@ use craft\elements\Asset;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\UrlHelper;
+use craft\helpers\Image;
 use craft\models\AssetTransform;
 
 use Imgix\UrlBuilder;
@@ -72,6 +73,11 @@ class ImgixImageTransform extends ImageTransform
      */
     public $securityToken;
 
+    /**
+     * @var bool
+     */
+    public $allowPdfs;
+
     // Public Methods
     // =========================================================================
 
@@ -100,6 +106,12 @@ class ImgixImageTransform extends ImageTransform
                         $params[$value] = $transform[$key];
                     }
                 }
+
+                // Remove height parameter if original asset is PDF
+                if($asset->kind === 'pdf') {
+                    ArrayHelper::remove($params, 'h');
+                }
+
                 // Remove any 'AUTO' settings
                 ArrayHelper::removeValue($params, 'AUTO');
                 // Handle the Imgix auto setting for compression/format
@@ -329,13 +341,23 @@ class ImgixImageTransform extends ImageTransform
     /**
      * @inheritdoc
      */
+    public function canManipulateAsImage(string $extension, $height): bool
+    {
+        return ($this->allowPdfs && $extension === 'pdf')
+            || ($this->allowPdfs && Image::canManipulateAsImage($extension))
+            || ($height > 0 && Image::canManipulateAsImage($extension));
+    }
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         $rules = parent::rules();
         $rules = array_merge($rules, [
             [['domain', 'apiKey', 'securityToken'], 'default', 'value' => ''],
             [['domain', 'apiKey', 'securityToken'], 'string'],
-        ]);
+            ['allowPdfs', 'boolean'],
+            ]);
 
         return $rules;
     }
